@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>共享艾森豪威尔矩阵</title>
-    <script src="https://unpkg.com/yjs@latest"></script>
-    <script src="https://unpkg.com/y-webrtc@latest"></script>
-    <script src="https://unpkg.com/y-indexeddb@latest"></script>
+    <title>共享矩阵</title>
+    <!-- 换用稳定 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/yjs@13.6.15/dist/y.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/y-webrtc@1.0.11/dist/y-webrtc.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/y-indexeddb@9.0.12/dist/y-indexeddb.umd.js"></script>
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
@@ -36,10 +37,10 @@
             background: white;
             min-height: 400px;
         }
-        #q1 { border-color: #d32f2f; } /* 重要且紧急 - 红 */
-        #q2 { border-color: #388e3c; } /* 重要不紧急 - 绿 */
-        #q3 { border-color: #f57c00; } /* 紧急不重要 - 橙 */
-        #q4 { border-color: #455a64; } /* 不重要不紧急 - 灰 */
+        #q1 { border-color: #d32f2f; } /* 红 */
+        #q2 { border-color: #388e3c; } /* 绿 */
+        #q3 { border-color: #f57c00; } /* 橙 */
+        #q4 { border-color: #455a64; } /* 灰 */
         
         .quad h2 {
             text-align: center;
@@ -131,24 +132,33 @@
     </div>
 
     <script>
-        // 修改这里可以自定义房间名，所有人必须用同一个房间名才能同步
-        const roomName = 'shared-eisenhower-matrix';
+        // 你的专属房间名（避免冲突）
+        const roomName = 'vvsw5-team-matrix';
 
         const ydoc = new Y.Doc();
-        const provider = new Y.WebrtcProvider(roomName, ydoc);
+        
+        // 多信令服务器，提高连接成功率
+        const provider = new Y.WebrtcProvider(roomName, ydoc, {
+            signaling: [
+                'wss://signaling.yjs.dev',
+                'wss://y-webrtc-signaling-eu.herokuapp.com'
+            ]
+        });
+        
         const idb = new Y.IndexeddbPersistence(roomName, ydoc);
 
         const tasks = ydoc.getMap('tasks');
 
-        // 在线人数显示
+        // 在线人数
         const onlineDiv = document.getElementById('online');
         function updateOnline() {
-            onlineDiv.textContent = `${provider.awareness.getStates().size} 人在线`;
+            const count = provider.awareness.getStates().size;
+            onlineDiv.textContent = `${count} 人在线${count > 0 ? '（包括你）' : ''}`;
         }
         provider.awareness.on('change', updateOnline);
         updateOnline();
 
-        // 渲染所有任务
+        // 渲染任务
         function render() {
             document.querySelectorAll('.quad ul').forEach(ul => ul.innerHTML = '');
             tasks.forEach((taskMap, id) => {
@@ -186,39 +196,3 @@
                 if (text) {
                     const id = crypto.randomUUID();
                     const taskMap = new Y.Map();
-                    taskMap.set('text', text);
-                    taskMap.set('quadrant', qid);
-                    tasks.set(id, taskMap);
-                    input.value = '';
-                }
-            };
-
-            btn.onclick = addTask;
-            input.addEventListener('keydown', e => {
-                if (e.key === 'Enter') addTask();
-            });
-        });
-
-        // 拖拽移动象限
-        document.querySelectorAll('.quad ul').forEach(ul => {
-            ul.addEventListener('dragover', e => e.preventDefault());
-            ul.addEventListener('drop', e => {
-                e.preventDefault();
-                const id = e.dataTransfer.getData('taskId');
-                if (id) {
-                    const taskMap = tasks.get(id);
-                    if (taskMap) {
-                        taskMap.set('quadrant', ul.parentElement.id);
-                    }
-                }
-            });
-        });
-
-        document.addEventListener('dragstart', e => {
-            if (e.target.tagName === 'LI') {
-                e.dataTransfer.setData('taskId', e.target.dataset.id);
-            }
-        });
-    </script>
-</body>
-</html>
