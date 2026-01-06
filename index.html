@@ -3,93 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>共享矩阵</title>
-    <!-- 换用稳定 CDN -->
+    <title>共享艾森豪威尔矩阵</title>
     <script src="https://cdn.jsdelivr.net/npm/yjs@13.6.15/dist/y.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/y-webrtc@1.0.11/dist/y-webrtc.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/y-indexeddb@9.0.12/dist/y-indexeddb.umd.js"></script>
     <style>
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #f5f5f5;
-        }
-        h1 {
-            text-align: center;
-        }
-        #online {
-            text-align: center;
-            font-size: 1.2em;
-            margin: 10px 0;
-            color: #333;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        .quad {
-            border: 2px solid #ccc;
-            border-radius: 10px;
-            padding: 15px;
-            background: white;
-            min-height: 400px;
-        }
-        #q1 { border-color: #d32f2f; } /* 红 */
-        #q2 { border-color: #388e3c; } /* 绿 */
-        #q3 { border-color: #f57c00; } /* 橙 */
-        #q4 { border-color: #455a64; } /* 灰 */
-        
-        .quad h2 {
-            text-align: center;
-            margin-top: 0;
-            color: #333;
-        }
-        .add-area {
-            display: flex;
-            margin-bottom: 15px;
-        }
-        .add-area input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .add-area button {
-            margin-left: 8px;
-            padding: 0 15px;
-            background: #1976d2;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        ul {
-            list-style: none;
-            padding: 0;
-            min-height: 200px;
-        }
-        li {
-            padding: 10px;
-            margin: 8px 0;
-            background: #eee;
-            border-radius: 4px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: move;
-        }
-        li span.delete {
-            color: red;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 1.2em;
-        }
-        li:hover {
-            background: #ddd;
-        }
+        body { font-family: Arial, Helvetica, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
+        h1 { text-align: center; }
+        #online { text-align: center; font-size: 1.2em; margin: 10px 0; color: #333; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .quad { border: 2px solid #ccc; border-radius: 10px; padding: 15px; background: white; min-height: 400px; }
+        #q1 { border-color: #d32f2f; } #q2 { border-color: #388e3c; } #q3 { border-color: #f57c00; } #q4 { border-color: #455a64; }
+        .quad h2 { text-align: center; margin-top: 0; color: #333; }
+        .add-area { display: flex; margin-bottom: 15px; }
+        .add-area input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .add-area button { margin-left: 8px; padding: 0 15px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        ul { list-style: none; padding: 0; min-height: 200px; }
+        li { padding: 10px; margin: 8px 0; background: #eee; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; cursor: move; }
+        li span.delete { color: red; font-weight: bold; cursor: pointer; font-size: 1.2em; }
+        li:hover { background: #ddd; }
     </style>
 </head>
 <body>
@@ -97,59 +29,25 @@
     <div id="online">0 人在线</div>
     
     <div class="grid">
-        <div class="quad" id="q1">
-            <h2>重要且紧急</h2>
-            <div class="add-area">
-                <input type="text" placeholder="输入任务，按回车或点击添加">
-                <button>添加</button>
-            </div>
-            <ul></ul>
-        </div>
-        <div class="quad" id="q2">
-            <h2>重要不紧急</h2>
-            <div class="add-area">
-                <input type="text" placeholder="输入任务，按回车或点击添加">
-                <button>添加</button>
-            </div>
-            <ul></ul>
-        </div>
-        <div class="quad" id="q3">
-            <h2>紧急不重要</h2>
-            <div class="add-area">
-                <input type="text" placeholder="输入任务，按回车或点击添加">
-                <button>添加</button>
-            </div>
-            <ul></ul>
-        </div>
-        <div class="quad" id="q4">
-            <h2>不重要不紧急</h2>
-            <div class="add-area">
-                <input type="text" placeholder="输入任务，按回车或点击添加">
-                <button>添加</button>
-            </div>
-            <ul></ul>
-        </div>
+        <div class="quad" id="q1"><h2>重要且紧急</h2><div class="add-area"><input type="text" placeholder="输入任务，按回车或点击添加"><button>添加</button></div><ul></ul></div>
+        <div class="quad" id="q2"><h2>重要不紧急</h2><div class="add-area"><input type="text" placeholder="输入任务，按回车或点击添加"><button>添加</button></div><ul></ul></div>
+        <div class="quad" id="q3"><h2>紧急不重要</h2><div class="add-area"><input type="text" placeholder="输入任务，按回车或点击添加"><button>添加</button></div><ul></ul></div>
+        <div class="quad" id="q4"><h2>不重要不紧急</h2><div class="add-area"><input type="text" placeholder="输入任务，按回车或点击添加"><button>添加</button></div><ul></ul></div>
     </div>
 
     <script>
-        // 你的专属房间名（避免冲突）
         const roomName = 'vvsw5-team-matrix';
 
         const ydoc = new Y.Doc();
         
-        // 多信令服务器，提高连接成功率
         const provider = new Y.WebrtcProvider(roomName, ydoc, {
-            signaling: [
-                'wss://signaling.yjs.dev',
-                'wss://y-webrtc-signaling-eu.herokuapp.com'
-            ]
+            signaling: ['wss://signaling.yjs.dev', 'wss://y-webrtc-signaling-eu.herokuapp.com']
         });
         
         const idb = new Y.IndexeddbPersistence(roomName, ydoc);
 
         const tasks = ydoc.getMap('tasks');
 
-        // 在线人数
         const onlineDiv = document.getElementById('online');
         function updateOnline() {
             const count = provider.awareness.getStates().size;
@@ -158,7 +56,6 @@
         provider.awareness.on('change', updateOnline);
         updateOnline();
 
-        // 渲染任务
         function render() {
             document.querySelectorAll('.quad ul').forEach(ul => ul.innerHTML = '');
             tasks.forEach((taskMap, id) => {
@@ -169,14 +66,10 @@
                 li.textContent = text;
                 li.draggable = true;
                 li.dataset.id = id;
-
                 const del = document.createElement('span');
                 del.textContent = '✕';
                 del.className = 'delete';
-                del.onclick = (e) => {
-                    e.stopPropagation();
-                    tasks.delete(id);
-                };
+                del.onclick = (e) => { e.stopPropagation(); tasks.delete(id); };
                 li.appendChild(del);
                 ul.appendChild(li);
             });
@@ -185,14 +78,42 @@
         tasks.observeDeep(render);
         render();
 
-        // 添加任务
         document.querySelectorAll('.quad').forEach(quad => {
             const input = quad.querySelector('input');
             const btn = quad.querySelector('button');
             const qid = quad.id;
-
             const addTask = () => {
                 const text = input.value.trim();
                 if (text) {
                     const id = crypto.randomUUID();
                     const taskMap = new Y.Map();
+                    taskMap.set('text', text);
+                    taskMap.set('quadrant', qid);
+                    tasks.set(id, taskMap);
+                    input.value = '';
+                }
+            };
+            btn.onclick = addTask;
+            input.addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
+        });
+
+        document.querySelectorAll('.quad ul').forEach(ul => {
+            ul.addEventListener('dragover', e => e.preventDefault());
+            ul.addEventListener('drop', e => {
+                e.preventDefault();
+                const id = e.dataTransfer.getData('taskId');
+                if (id) {
+                    const taskMap = tasks.get(id);
+                    if (taskMap) taskMap.set('quadrant', ul.parentElement.id);
+                }
+            });
+        });
+
+        document.addEventListener('dragstart', e => {
+            if (e.target.tagName === 'LI') {
+                e.dataTransfer.setData('taskId', e.target.dataset.id);
+            }
+        });
+    </script>
+</body>
+</html>
