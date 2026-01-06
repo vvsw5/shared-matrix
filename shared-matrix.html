@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>共享艾森豪威尔矩阵</title>
+    <script src="https://unpkg.com/yjs@latest"></script>
+    <script src="https://unpkg.com/y-webrtc@latest"></script>
+    <script src="https://unpkg.com/y-indexeddb@latest"></script>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+        }
+        #online {
+            text-align: center;
+            font-size: 1.2em;
+            margin: 10px 0;
+            color: #333;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .quad {
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 15px;
+            background: white;
+            min-height: 400px;
+        }
+        #q1 { border-color: #d32f2f; } /* 重要且紧急 - 红 */
+        #q2 { border-color: #388e3c; } /* 重要不紧急 - 绿 */
+        #q3 { border-color: #f57c00; } /* 紧急不重要 - 橙 */
+        #q4 { border-color: #455a64; } /* 不重要不紧急 - 灰 */
+        
+        .quad h2 {
+            text-align: center;
+            margin-top: 0;
+            color: #333;
+        }
+        .add-area {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .add-area input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .add-area button {
+            margin-left: 8px;
+            padding: 0 15px;
+            background: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            min-height: 200px;
+        }
+        li {
+            padding: 10px;
+            margin: 8px 0;
+            background: #eee;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+        }
+        li span.delete {
+            color: red;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+        li:hover {
+            background: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>共享艾森豪威尔矩阵（多人实时协作）</h1>
+    <div id="online">0 人在线</div>
+    
+    <div class="grid">
+        <div class="quad" id="q1">
+            <h2>重要且紧急</h2>
+            <div class="add-area">
+                <input type="text" placeholder="输入任务，按回车或点击添加">
+                <button>添加</button>
+            </div>
+            <ul></ul>
+        </div>
+        <div class="quad" id="q2">
+            <h2>重要不紧急</h2>
+            <div class="add-area">
+                <input type="text" placeholder="输入任务，按回车或点击添加">
+                <button>添加</button>
+            </div>
+            <ul></ul>
+        </div>
+        <div class="quad" id="q3">
+            <h2>紧急不重要</h2>
+            <div class="add-area">
+                <input type="text" placeholder="输入任务，按回车或点击添加">
+                <button>添加</button>
+            </div>
+            <ul></ul>
+        </div>
+        <div class="quad" id="q4">
+            <h2>不重要不紧急</h2>
+            <div class="add-area">
+                <input type="text" placeholder="输入任务，按回车或点击添加">
+                <button>添加</button>
+            </div>
+            <ul></ul>
+        </div>
+    </div>
+
+    <script>
+        // 修改这里可以自定义房间名，所有人必须用同一个房间名才能同步
+        const roomName = 'shared-eisenhower-matrix';
+
+        const ydoc = new Y.Doc();
+        const provider = new Y.WebrtcProvider(roomName, ydoc);
+        const idb = new Y.IndexeddbPersistence(roomName, ydoc);
+
+        const tasks = ydoc.getMap('tasks');
+
+        // 在线人数显示
+        const onlineDiv = document.getElementById('online');
+        function updateOnline() {
+            onlineDiv.textContent = `${provider.awareness.getStates().size} 人在线`;
+        }
+        provider.awareness.on('change', updateOnline);
+        updateOnline();
+
+        // 渲染所有任务
+        function render() {
+            document.querySelectorAll('.quad ul').forEach(ul => ul.innerHTML = '');
+            tasks.forEach((taskMap, id) => {
+                const quad = taskMap.get('quadrant') || 'q4';
+                const text = taskMap.get('text') || '';
+                const ul = document.getElementById(quad).querySelector('ul');
+                const li = document.createElement('li');
+                li.textContent = text;
+                li.draggable = true;
+                li.dataset.id = id;
+
+                const del = document.createElement('span');
+                del.textContent = '✕';
+                del.className = 'delete';
+                del.onclick = (e) => {
+                    e.stopPropagation();
+                    tasks.delete(id);
+                };
+                li.appendChild(del);
+                ul.appendChild(li);
+            });
+        }
+
+        tasks.observeDeep(render);
+        render();
+
+        // 添加任务
+        document.querySelectorAll('.quad').forEach(quad => {
+            const input = quad.querySelector('input');
+            const btn = quad.querySelector('button');
+            const qid = quad.id;
+
+            const addTask = () => {
+                const text = input.value.trim();
+                if (text) {
+                    const id = crypto.randomUUID();
+                    const taskMap = new Y.Map();
+                    taskMap.set('text', text);
+                    taskMap.set('quadrant', qid);
+                    tasks.set(id, taskMap);
+                    input.value = '';
+                }
+            };
+
+            btn.onclick = addTask;
+            input.addEventListener('keydown', e => {
+                if (e.key === 'Enter') addTask();
+            });
+        });
+
+        // 拖拽移动象限
+        document.querySelectorAll('.quad ul').forEach(ul => {
+            ul.addEventListener('dragover', e => e.preventDefault());
+            ul.addEventListener('drop', e => {
+                e.preventDefault();
+                const id = e.dataTransfer.getData('taskId');
+                if (id) {
+                    const taskMap = tasks.get(id);
+                    if (taskMap) {
+                        taskMap.set('quadrant', ul.parentElement.id);
+                    }
+                }
+            });
+        });
+
+        document.addEventListener('dragstart', e => {
+            if (e.target.tagName === 'LI') {
+                e.dataTransfer.setData('taskId', e.target.dataset.id);
+            }
+        });
+    </script>
+</body>
+</html>
