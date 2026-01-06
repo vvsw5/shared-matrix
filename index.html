@@ -13,7 +13,10 @@
         #online { text-align: center; font-size: 1.2em; margin: 10px 0; color: #333; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .quad { border: 2px solid #ccc; border-radius: 10px; padding: 15px; background: white; min-height: 400px; }
-        #q1 { border-color: #d32f2f; } #q2 { border-color: #388e3c; } #q3 { border-color: #f57c00; } #q4 { border-color: #455a64; }
+        #q1 { border-color: #d32f2f; }
+        #q2 { border-color: #388e3c; }
+        #q3 { border-color: #f57c00; }
+        #q4 { border-color: #455a64; }
         .quad h2 { text-align: center; margin-top: 0; color: #333; }
         .add-area { display: flex; margin-bottom: 15px; }
         .add-area input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
@@ -29,10 +32,38 @@
     <div id="online">0 人在线</div>
     
     <div class="grid">
-        <div class="quad" id="q1"><h2>重要且紧急</h2><div class="add-area"><input type="text" placeholder="输入任务，按回车或点击添加"><button>添加</button></div><ul></ul></div>
-        <div class="quad" id="q2"><h2>重要不紧急</h2><div class="add-area"><input type="text" placeholder="输入任务，按回车或点击添加"><button>添加</button></div><ul></ul></div>
-        <div class="quad" id="q3"><h2>紧急不重要</h2><div class="add-area"><input type="text" placeholder="输入任务，按回车或点击添加"><button>添加</button></div><ul></ul></div>
-        <div class="quad" id="q4"><h2>不重要不紧急</h2><div class="add-area"><input type="text" placeholder="输入任务，按回车或点击添加"><button>添加</button></div><ul></ul></div>
+        <div class="quad" id="q1">
+            <h2>重要且紧急</h2>
+            <div class="add-area">
+                <input type="text" placeholder="输入任务，按回车或点击添加">
+                <button>添加</button>
+            </div>
+            <ul></ul>
+        </div>
+        <div class="quad" id="q2">
+            <h2>重要不紧急</h2>
+            <div class="add-area">
+                <input type="text" placeholder="输入任务，按回车或点击添加">
+                <button>添加</button>
+            </div>
+            <ul></ul>
+        </div>
+        <div class="quad" id="q3">
+            <h2>紧急不重要</h2>
+            <div class="add-area">
+                <input type="text" placeholder="输入任务，按回车或点击添加">
+                <button>添加</button>
+            </div>
+            <ul></ul>
+        </div>
+        <div class="quad" id="q4">
+            <h2>不重要不紧急</h2>
+            <div class="add-area">
+                <input type="text" placeholder="输入任务，按回车或点击添加">
+                <button>添加</button>
+            </div>
+            <ul></ul>
+        </div>
     </div>
 
     <script>
@@ -41,7 +72,10 @@
         const ydoc = new Y.Doc();
         
         const provider = new Y.WebrtcProvider(roomName, ydoc, {
-            signaling: ['wss://signaling.yjs.dev', 'wss://y-webrtc-signaling-eu.herokuapp.com']
+            signaling: [
+                'wss://signaling.yjs.dev',
+                'wss://y-webrtc-signaling-eu.herokuapp.com'
+            ]
         });
         
         const idb = new Y.IndexeddbPersistence(roomName, ydoc);
@@ -69,7 +103,10 @@
                 const del = document.createElement('span');
                 del.textContent = '✕';
                 del.className = 'delete';
-                del.onclick = (e) => { e.stopPropagation(); tasks.delete(id); };
+                del.onclick = (e) => {
+                    e.stopPropagation();
+                    tasks.delete(id);
+                };
                 li.appendChild(del);
                 ul.appendChild(li);
             });
@@ -94,7 +131,9 @@
                 }
             };
             btn.onclick = addTask;
-            input.addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
+            input.addEventListener('keydown', e => {
+                if (e.key === 'Enter') addTask();
+            });
         });
 
         document.querySelectorAll('.quad ul').forEach(ul => {
@@ -104,7 +143,9 @@
                 const id = e.dataTransfer.getData('taskId');
                 if (id) {
                     const taskMap = tasks.get(id);
-                    if (taskMap) taskMap.set('quadrant', ul.parentElement.id);
+                    if (taskMap) {
+                        taskMap.set('quadrant', ul.parentElement.id);
+                    }
                 }
             });
         });
